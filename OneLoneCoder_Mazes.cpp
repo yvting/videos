@@ -49,7 +49,12 @@ Last Updated: 10/07/2017
 #include <stack>
 using namespace std;
 
-#include "olcConsoleGameEngine.h"
+#include "olcConsoleGameEngineSDL.h"
+
+const int g_MazeWidth = 80;
+const int g_MazeHeight = 60;
+const int g_PathWidth = 3;
+const auto g_WaitTime = std::chrono::milliseconds(1);
 
 class OneLoneCoder_Maze : public olcConsoleGameEngine
 {
@@ -87,11 +92,11 @@ protected:
 	virtual bool OnUserCreate()
 	{
 		// Maze parameters
-		m_nMazeWidth = 40;
-		m_nMazeHeight = 25;		
+		m_nMazeWidth = g_MazeWidth;
+		m_nMazeHeight = g_MazeHeight;		
 		m_maze = new int[m_nMazeWidth * m_nMazeHeight];
 		memset(m_maze, 0x00, m_nMazeWidth * m_nMazeHeight * sizeof(int));
-		m_nPathWidth = 3;
+		m_nPathWidth = g_PathWidth;
 		
 		// Choose a starting cell
 		int x = rand() % m_nMazeWidth;
@@ -107,7 +112,7 @@ protected:
 	virtual bool OnUserUpdate(float fElapsedTime)
 	{
 		// Slow down for animation
-		this_thread::sleep_for(10ms);
+		this_thread::sleep_for(g_WaitTime);
 
 		// Little lambda function to calculate index in a readable way
 		auto offset = [&](int x, int y)
@@ -229,7 +234,9 @@ int main()
 
 	// Use olcConsoleGameEngine derived app
 	OneLoneCoder_Maze game;
-	game.ConstructConsole(160, 100, 8, 8);
+        int consoleWidth = g_MazeWidth*(g_PathWidth+1);
+        int consoleHeight = g_MazeHeight*(g_PathWidth+1);
+	game.ConstructConsole(consoleWidth, consoleHeight, 8, 8);
 	game.Start();
 
 	return 0;
