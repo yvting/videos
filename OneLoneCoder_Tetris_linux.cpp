@@ -109,12 +109,13 @@ void write_console_output (wchar_t* screen, WIN* p_win)
   refresh();
 }
 
-void read_input(bool* bKey)
+int read_input(bool* bKey)
 {
-  int c;
+  int c, ext;
   c = getch();
   memset(bKey, 0, sizeof(bool)*4);
 
+  ext = 0;
   switch (c) {
     case KEY_RIGHT:
       bKey[0] = TRUE;
@@ -128,8 +129,13 @@ void read_input(bool* bKey)
     case KEY_UP:
       bKey[3] = TRUE;
       break;
+    case 'Q':
+    case 'q':
+      ext = 1;
+      break;
   }
 
+  return ext;
 }
 
 int nScreenWidth = 80;			// Console Screen Size X (columns)
@@ -209,6 +215,7 @@ int main()
           endwin();
           return 1;
         }
+        mvprintw(0,0,"Press 'q' to exit...");
 
 	// HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	// SetConsoleActiveScreenBuffer(hConsole);
@@ -250,7 +257,7 @@ int main()
 		bForceDown = (nSpeedCount == nSpeed);
 
 		// Input ========================
-                read_input(bKey);
+                if (read_input(bKey)) break;
 		// for (int k = 0; k < 4; k++)								// R   L   D Z
 		// 	bKey[k] = (0x8000 & GetAsyncKeyState((unsigned char)("\x27\x25\x28Z"[k]))) != 0;
 		
