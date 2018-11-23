@@ -77,7 +77,14 @@ void init_ncurses ()
   noecho();
   curs_set(0);
   nodelay(stdscr, TRUE);
-
+  start_color();
+  init_pair(1,COLOR_WHITE, COLOR_BLACK);
+  init_pair(2,COLOR_RED, COLOR_BLACK);
+  init_pair(3,COLOR_GREEN, COLOR_BLACK);
+  init_pair(4,COLOR_YELLOW, COLOR_BLACK);
+  init_pair(5,COLOR_BLUE, COLOR_BLACK);
+  init_pair(6,COLOR_MAGENTA, COLOR_BLACK);
+  init_pair(7,COLOR_CYAN, COLOR_BLACK);
 }
 
 int init_win_params (WIN* p_win, int sx, int sy, int wd, int ht)
@@ -101,10 +108,11 @@ void write_console_output (wchar_t* screen, WIN* p_win)
       sy = p_win->starty,
       wd = p_win->width,
       ht = p_win->height;
-  int y, x;
+  int y, x, c;
   for (y = 0; y < ht; y++)
     for (x = 0; x < wd; x++) {
-      mvaddch(sy+y,sx+x,screen[y*wd+x]);
+      c = screen[y*wd+x];
+      mvaddch(sy+y,sx+x,c);
     }
   refresh();
 }
@@ -136,6 +144,16 @@ int read_input(bool* bKey)
   }
 
   return ext;
+}
+
+int color_tile(int c) 
+{
+  if (c == '#' || c == '=') {
+    return (c | A_BOLD);
+  } else if (c >= 'A' <= 'G') {
+    return (c | COLOR_PAIR (2 + c%6));
+  }
+  return c;
 }
 
 int nScreenWidth = 80;			// Console Screen Size X (columns)
@@ -210,12 +228,15 @@ int main()
         WIN win;
 	for (int i = 0; i < nScreenWidth*nScreenHeight; i++) screen[i] = L' ';
         init_ncurses();
-        if (init_win_params(&win, 0, 0, nScreenWidth, nScreenHeight)) {
+        if (init_win_params(&win, 0, 1, nScreenWidth, nScreenHeight)) {
           printf("The size of the console window is too small!\n");
           endwin();
           return 1;
         }
-        mvprintw(0,0,"Press 'q' to exit...");
+        attron(A_BLINK | A_BOLD | COLOR_PAIR(1));
+        printw("Press 'q' to end the game..." );
+        refresh();
+        attroff(A_BLINK | A_BOLD | COLOR_PAIR(1));
 
 	// HANDLE hConsole = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	// SetConsoleActiveScreenBuffer(hConsole);
@@ -332,14 +353,18 @@ int main()
 
 		// Draw Field
 		for (int x = 0; x < nFieldWidth; x++)
-			for (int y = 0; y < nFieldHeight; y++)
-				screen[(y + 2)*nScreenWidth + (x + 2)] = L" ABCDEFG=#"[pField[y*nFieldWidth + x]];
+			for (int y = 0; y < nFieldHeight; y++) {
+                          screen[(y + 2)*nScreenWidth + (x + 2)] = 
+                            color_tile(L" ABCDEFG=#"[pField[y*nFieldWidth + x]]);
+                        }
 
 		// Draw Current Piece
 		for (int px = 0; px < 4; px++)
 			for (int py = 0; py < 4; py++)
-				if (tetromino[nCurrentPiece][Rotate(px, py, nCurrentRotation)] != L'.')
-					screen[(nCurrentY + py + 2)*nScreenWidth + (nCurrentX + px + 2)] = nCurrentPiece + 65;
+				if (tetromino[nCurrentPiece][Rotate(px, py, nCurrentRotation)] != L'.') {
+					screen[(nCurrentY + py + 2)*nScreenWidth + (nCurrentX + px + 2)] = 
+                                          color_tile(nCurrentPiece + 65);
+                                }
 
 		// Draw Score
 		swprintf(&screen[2 * nScreenWidth + nFieldWidth + 6], 16, L"SCORE: %8d", nScore);
