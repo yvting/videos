@@ -102,8 +102,8 @@ void write_console_output (wchar_t* screen, WIN* p_win)
       wd = p_win->width,
       ht = p_win->height;
   int y, x;
-  for (y = 0; y <= ht; y++)
-    for (x = 0; x <= wd; x++) {
+  for (y = 0; y < ht; y++)
+    for (x = 0; x < wd; x++) {
       mvaddch(sy+y,sx+x,screen[y*wd+x]);
     }
   refresh();
@@ -372,7 +372,6 @@ int main()
 	// CloseHandle(hConsole);
         endwin();
 	cout << "Game Over!! Score:" << nScore << endl;
-	system("pause");
 	return 0;
 }
 
