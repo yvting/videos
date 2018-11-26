@@ -61,6 +61,7 @@ using namespace std;
 #include <stdio.h>
 #include <ncurses.h>
 // #include <Windows.h>
+#include <time.h>
 
 typedef struct _WIN_struct {
 	int startx, starty;
@@ -223,6 +224,9 @@ bool DoesPieceFit(int nTetromino, int nRotation, int nPosX, int nPosY)
 
 int main()
 {
+        // Set the seed for the random number generator
+        srand(time(0));
+
 	// Create Screen Buffer
 	wchar_t *screen = new wchar_t[nScreenWidth*nScreenHeight];
         WIN win;
