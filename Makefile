@@ -1,6 +1,7 @@
 CC=g++
-LCURSES=-lncurses
-LSDL2=-DUNICODE -I/usr/include/SDL2 -lSDL2 -lpthread -std=c++11
+SLD2=/usr/include/SDL2
+LCURSES=-lncurses -std=c++11
+LSDL2=-DUNICODE -I$(SDL2) -lSDL2 -lpthread -std=c++11
 OBJS=tetris mazes
 
 all: $(OBJS)
@@ -11,3 +12,8 @@ tetris: OneLoneCoder_Tetris_linux.cpp
 
 mazes: OneLoneCoder_Mazes.cpp
 	$(CC) $< $(LSDL2) -o $@
+
+.PHONY: clean
+
+clean:
+	rm $(OBJS)

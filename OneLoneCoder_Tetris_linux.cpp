@@ -150,7 +150,7 @@ int color_tile(int c)
 {
   if (c == '#' || c == '=') {
     return (c | A_BOLD);
-  } else if (c >= 'A' <= 'G') {
+  } else if (c >= 'A' && c <= 'G') {
     return (c | COLOR_PAIR (2 + c%6));
   }
   return c;
@@ -229,9 +229,10 @@ int main()
 	for (int i = 0; i < nScreenWidth*nScreenHeight; i++) screen[i] = L' ';
         init_ncurses();
         if (init_win_params(&win, 0, 1, nScreenWidth, nScreenHeight)) {
-          printf("The size of the console window is too small!\n");
           endwin();
-          return 1;
+          delete[] screen;
+          cout << "The size of the console window is too small!" << endl;
+          return 0;
         }
         attron(A_BLINK | A_BOLD | COLOR_PAIR(1));
         printw("Press 'q' to end the game..." );
@@ -273,7 +274,7 @@ int main()
 	while (!bGameOver) // Main Loop
 	{
 		// Timing =======================
-		this_thread::sleep_for(50ms); // Small Step = 1 Game Tick
+		this_thread::sleep_for(std::chrono::milliseconds(50)); // Small Step = 1 Game Tick
 		nSpeedCount++;
 		bForceDown = (nSpeedCount == nSpeed);
 
@@ -375,7 +376,7 @@ int main()
 			// Display Frame (cheekily to draw lines)
 			// WriteConsoleOutputCharacter(hConsole, screen, nScreenWidth * nScreenHeight, { 0,0 }, &dwBytesWritten);
                         write_console_output(screen, &win);
-			this_thread::sleep_for(400ms); // Delay a bit
+			this_thread::sleep_for(std::chrono::milliseconds(400)); // Delay a bit
 
 			for (auto &v : vLines)
 				for (int px = 1; px < nFieldWidth - 1; px++)
@@ -396,6 +397,8 @@ int main()
 	// Oh Dear
 	// CloseHandle(hConsole);
         endwin();
+        delete[] screen;
+        delete[] pField;
 	cout << "Game Over!! Score:" << nScore << endl;
 	return 0;
 }
